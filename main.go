@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+import "local/trader/parsers"
+
 func main() {
 	historyFile := flag.String("history", "history.csv", "history file location")
 
@@ -18,12 +20,12 @@ func main() {
 		os.Exit(1)
 	}
 	reader := csv.NewReader(csvFile)
-	d, err := getFirstLine(reader)
+	closes, err := parsers.CoindeskMarketClose(reader)
 	if err != nil {
 		fmt.Printf("%v", err)
 		os.Exit(1)
 	}
-	fmt.Println(d)
+	fmt.Printf("%+v", closes)
 }
 
 func getFirstLine(reader *csv.Reader) ([]string, error) {

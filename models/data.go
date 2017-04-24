@@ -14,7 +14,7 @@ const (
 )
 
 type MarketClose struct {
-	datetime time.Time
-	currency Currency
-	value    float64
+	Datetime time.Time
+	Currency Currency
+	Price    float64
 }
