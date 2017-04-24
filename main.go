@@ -9,6 +9,7 @@ import (
 )
 
 import "local/trader/parsers"
+import "local/trader/analysis"
 
 func main() {
 	historyFile := flag.String("history", "history.csv", "history file location")
@@ -25,7 +26,7 @@ func main() {
 		fmt.Printf("%v", err)
 		os.Exit(1)
 	}
-	fmt.Printf("%+v", closes)
+	analysis.ChangeBasedCorrelation(closes)
 }
 
 func getFirstLine(reader *csv.Reader) ([]string, error) {
