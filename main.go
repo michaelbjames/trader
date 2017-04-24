@@ -21,7 +21,7 @@ func main() {
 		os.Exit(1)
 	}
 	reader := csv.NewReader(csvFile)
-	closes, err := parsers.CoindeskMarketClose(reader)
+	closes, err := parsers.SP500(reader)
 	if err != nil {
 		fmt.Printf("%v", err)
 		os.Exit(1)
