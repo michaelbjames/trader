@@ -7,7 +7,7 @@ import (
 
 const sp500DateFmt string = "2006-01-02"
 
-func SP500(reader *csv.Reader) ([]models.MarketClose, error) {
+func SP500(reader *csv.Reader) ([]models.Event, error) {
 	options := options{
 		DateFmt:  sp500DateFmt,
 		Currency: models.CurrencyAbstract,

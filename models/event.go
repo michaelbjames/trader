@@ -4,8 +4,10 @@ import (
 	"time"
 )
 
+// Currency symbol.
 type Currency string
 
+// Currency instances.
 const (
 	CurrencyAbstract Currency = "abstract"
 	CurrencyBTC      Currency = "BTC"
@@ -14,7 +16,8 @@ const (
 	CurrencyETH      Currency = "ETH"
 )
 
-type MarketClose struct {
+// Event is the end-of-day value.
+type Event struct {
 	Datetime time.Time
 	Currency Currency
 	Price    float64

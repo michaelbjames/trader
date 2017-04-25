@@ -13,7 +13,7 @@ const (
 	Positive
 )
 
-func ChangeBasedCorrelation(days []models.MarketClose) {
+func ChangeBasedCorrelation(days []models.Event) {
 	actionableDays := days[1:]
 	changes := make([]Change, len(actionableDays))
 	for dayIndex, day := range actionableDays {
@@ -40,6 +40,43 @@ func ChangeBasedCorrelation(days []models.MarketClose) {
 	}
 	fmt.Printf("size: %d; flips: %d; correct implication: %d;",
 		len(changes[1:]),
+		flips,
+		successes)
+}
+
+func TwoDayStreaks(days []models.Event) {
+	actionableDays := days[1:]
+	changes := make([]Change, len(actionableDays))
+	for dayIndex, day := range actionableDays {
+		priorDay := days[dayIndex]
+		change := day.Price - priorDay.Price
+		if change < 0 {
+			changes[dayIndex] = Negative
+		} else if change == 0 {
+			changes[dayIndex] = None
+		} else {
+			changes[dayIndex] = Positive
+		}
+	}
+	var flips int
+	var successes int
+	var streaks int
+	for changeIndex, change := range changes[2:] {
+		priorChange := changes[changeIndex+1]
+		firstChange := changes[changeIndex]
+		if firstChange == priorChange {
+			streaks++
+			if priorChange != change {
+				flips++
+			}
+			if priorChange == change {
+				successes++
+			}
+		}
+	}
+	fmt.Printf("size: %d; streaks: %d; flips: %d; correct implication: %d;",
+		len(changes[1:]),
+		streaks,
 		flips,
 		successes)
 }

@@ -21,12 +21,12 @@ func main() {
 		os.Exit(1)
 	}
 	reader := csv.NewReader(csvFile)
-	closes, err := parsers.SP500(reader)
+	closes, err := parsers.CoindeskMarketClose(reader)
 	if err != nil {
 		fmt.Printf("%v", err)
 		os.Exit(1)
 	}
-	analysis.ChangeBasedCorrelation(closes)
+	analysis.TwoDayStreaks(closes)
 }
 
 func getFirstLine(reader *csv.Reader) ([]string, error) {

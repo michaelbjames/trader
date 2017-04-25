@@ -18,12 +18,12 @@ type options struct {
 	Currency models.Currency
 }
 
-func datevalueParse(reader *csv.Reader, options options) ([]models.MarketClose, error) {
+func datevalueParse(reader *csv.Reader, options options) ([]models.Event, error) {
 	lines, err := reader.ReadAll()
 	if err != nil {
 		return nil, errors.Wrap(err, "Bad CSV!")
 	}
-	closes := []models.MarketClose{}
+	closes := []models.Event{}
 	for lineNumber, line := range lines {
 		mc, err := parseLine(line, options.DateFmt)
 		if err != nil {
@@ -36,17 +36,17 @@ func datevalueParse(reader *csv.Reader, options options) ([]models.MarketClose, 
 	return closes, nil
 }
 
-func parseLine(csvLine []string, dateFmt string) (models.MarketClose, error) {
+func parseLine(csvLine []string, dateFmt string) (models.Event, error) {
 	datetimeString := csvLine[0]
 	datetime, err := time.Parse(dateFmt, datetimeString)
 	if err != nil {
-		return models.MarketClose{}, errors.Wrap(err, "unable to parse time in line")
+		return models.Event{}, errors.Wrap(err, "unable to parse time in line")
 	}
 	closePrice, err := strconv.ParseFloat(csvLine[1], 64)
 	if err != nil {
-		return models.MarketClose{}, errors.Wrap(err, "unable to parse close price")
+		return models.Event{}, errors.Wrap(err, "unable to parse close price")
 	}
-	return models.MarketClose{
+	return models.Event{
 		Datetime: datetime,
 		Price:    closePrice,
 	}, nil
