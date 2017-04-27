@@ -1,0 +1,8 @@
+hash: 5433b704e768e7228f97c82302c9f22deae90debc61ad5b5f2b56a23c81fb9a0
+updated: 2017-04-26T21:48:33.26325875-04:00
+imports:
+- name: github.com/pkg/errors
+  version: 645ef00459ed84a119197bfb8d8205042c6df63d
+- name: gopkg.in/yaml.v2
+  version: cd8b52f8269e0feb286dfeef29f8fe4d5b397e0b
+testImports: []
