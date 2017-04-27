@@ -4,12 +4,11 @@ import (
 	"encoding/csv"
 	"flag"
 	"fmt"
+	"local/trader/analysis"
+	"local/trader/parsers"
 	"os"
 	"time"
 )
-
-import "local/trader/parsers"
-import "local/trader/analysis"
 
 func main() {
 	historyFile := flag.String("history", "history.csv", "history file location")
