@@ -15,3 +15,11 @@ const (
 	BrokerRobinhood Broker = "Robinhood"
 	BrokerCoindesk  Broker = "Coindesk"
 )
+
+type AnalysisInit struct {
+	Source []Event
+}
+
+type AnalysisBuy int
+
+type AnalysisSell int
