@@ -2,22 +2,42 @@ package main
 
 import (
 	"encoding/csv"
-	"flag"
 	"fmt"
 	"local/trader/analysis"
 	"local/trader/parsers"
 	"os"
 	"time"
+
+	"github.com/pkg/errors"
+
+	cli "gopkg.in/urfave/cli.v1"
 )
 
 func main() {
-	historyFile := flag.String("history", "history.csv", "history file location")
+	app := cli.NewApp()
 
-	flag.Parse()
-	csvFile, err := os.Open(*historyFile)
+	app.Commands = []cli.Command{
+		{
+			Name:  "historical",
+			Usage: "run an analysis on historical data",
+			Action: func(c *cli.Context) error {
+				principalStr := c.Args().First()
+				brokerageName := c.Args().Get(1)
+				historyFile := c.Args().Get(2)
+				fmt.Println("added task: ", c.Args().First())
+				return historical(principalStr, brokerageName, historyFile)
+			},
+		},
+	}
+
+	app.Run(os.Args)
+}
+
+func historical(principalStr string, brokerageStr string, historyFileName string) error {
+	csvFile, err := os.Open(historyFileName)
 	if err != nil {
 		fmt.Printf("%v", err)
-		os.Exit(1)
+		return errors.Wrap(err, "Unable to open file")
 	}
 	reader := csv.NewReader(csvFile)
 	closes, err := parsers.CoindeskMarketClose(reader)
@@ -26,6 +46,7 @@ func main() {
 		os.Exit(1)
 	}
 	analysis.TwoDayStreaks(closes)
+	return nil
 }
 
 func getFirstLine(reader *csv.Reader) ([]string, error) {
