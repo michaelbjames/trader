@@ -4,9 +4,11 @@ import (
 	"encoding/csv"
 	"fmt"
 	"local/trader/analysis"
+	"local/trader/mappers"
+	"local/trader/models"
 	"local/trader/parsers"
 	"os"
-	"time"
+	"strconv"
 
 	"github.com/pkg/errors"
 
@@ -24,7 +26,6 @@ func main() {
 				principalStr := c.Args().First()
 				brokerageName := c.Args().Get(1)
 				historyFile := c.Args().Get(2)
-				fmt.Println("added task: ", c.Args().First())
 				return historical(principalStr, brokerageName, historyFile)
 			},
 		},
@@ -34,6 +35,14 @@ func main() {
 }
 
 func historical(principalStr string, brokerageStr string, historyFileName string) error {
+	principal, err := strconv.ParseFloat(principalStr, 64)
+	if err != nil {
+		return errors.Wrap(err, "principal is not a number")
+	}
+	broker, err := mappers.ParseBroker(brokerageStr)
+	if err != nil {
+		return errors.Wrap(err, "could not parse broker")
+	}
 	csvFile, err := os.Open(historyFileName)
 	if err != nil {
 		fmt.Printf("%v", err)
@@ -45,18 +54,20 @@ func historical(principalStr string, brokerageStr string, historyFileName string
 		fmt.Printf("%v", err)
 		os.Exit(1)
 	}
+
+	_ = newHistoricalHistory(principal, broker, closes)
+
 	analysis.TwoDayStreaks(closes)
 	return nil
 }
 
-func getFirstLine(reader *csv.Reader) ([]string, error) {
-	l1, err := reader.Read()
-	if err != nil {
-		return nil, err
+func newHistoricalHistory(principal float64, broker models.BrokerageName, events []models.Event) models.History {
+	switch broker {
+	case models.BrokerAnalysis:
+		_ = models.AnalysisInit{
+			Source:    events,
+			Principal: principal,
+		}
 	}
-	_, err = time.Parse("2006-01-02 15:04:05", l1[0])
-	if err == nil {
-		return l1, nil
-	}
-	return getFirstLine(reader)
+	return nil
 }

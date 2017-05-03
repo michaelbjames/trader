@@ -6,18 +6,19 @@ type Brokerage interface {
 	Sell(interface{}) error
 }
 
-// Broker is the brokerage we'll execute a trade through.
-type Broker string
+// BrokerageName is the brokerage we'll execute a trade through.
+type BrokerageName string
 
 // Some brokers. Analysis does no live stuff.
 const (
-	BrokerAnalysis  Broker = "Analysis"
-	BrokerRobinhood Broker = "Robinhood"
-	BrokerCoindesk  Broker = "Coindesk"
+	BrokerAnalysis  BrokerageName = "analysis"
+	BrokerRobinhood BrokerageName = "robinhood"
+	BrokerCoindesk  BrokerageName = "coindesk"
 )
 
 type AnalysisInit struct {
-	Source []Event
+	Source    []Event
+	Principal float64
 }
 
 type AnalysisBuy int

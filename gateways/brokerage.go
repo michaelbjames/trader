@@ -9,7 +9,7 @@ func Trade(action *models.Action) {
 	return
 }
 
-func New(gateway models.Broker, conf interface{}) models.Brokerage {
+func New(gateway models.BrokerageName, conf interface{}) models.Brokerage {
 	switch gateway {
 	case models.BrokerAnalysis:
 	default:
