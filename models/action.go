@@ -1,10 +1,12 @@
 package models
 
+import "math/big"
+
 // Action holds the data required to perform a trade (or not perform one).
 type Action struct {
 	Type     ActionType
 	Symbol   Symbol
-	Quantity float64
+	Quantity big.Float
 }
 
 // ActionType are the kinds of an Action.

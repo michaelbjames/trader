@@ -1,6 +1,7 @@
 package models
 
 import (
+	"math/big"
 	"time"
 )
 
@@ -20,5 +21,5 @@ const (
 type Event struct {
 	Datetime time.Time
 	Currency Currency
-	Price    float64
+	Price    big.Float
 }

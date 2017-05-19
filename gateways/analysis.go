@@ -4,12 +4,13 @@ import (
 	"errors"
 	"local/trader/config"
 	"local/trader/models"
+	"math/big"
 )
 
 type analysisBroker struct {
-	Initial      float64
-	Current      float64
-	Holdings     int
+	Initial      *big.Float
+	Current      *big.Float
+	Holdings     *big.Float
 	Actions      []models.Action
 	Source       []models.Event
 	SourceOffset int
@@ -17,8 +18,8 @@ type analysisBroker struct {
 
 func NewAnalysisBroker(conf models.AnalysisInit) models.Brokerage {
 	return &analysisBroker{
-		Initial:      float64(config.Get().Brokerages.Analysis.Initial),
-		Current:      float64(config.Get().Brokerages.Analysis.Initial),
+		Initial:      big.NewFloat(float64(config.Get().Brokerages.Analysis.Initial)),
+		Current:      big.NewFloat(float64(config.Get().Brokerages.Analysis.Initial)),
 		Source:       conf.Source,
 		SourceOffset: 0,
 	}
@@ -35,12 +36,14 @@ func (b *analysisBroker) Buy(i interface{}) error {
 		return errors.New("Analysis Buy: Invalid purchase action.")
 	}
 	marketValue := b.Source[b.SourceOffset]
-	purchaseValue := marketValue.Price * float64(quantity)
-	if purchaseValue > b.Current {
+	purchaseValue := big.NewFloat(0).Mul(
+		&marketValue.Price,
+		quantity)
+	if purchaseValue.Cmp(b.Current) > 0 {
 		return errors.New("Analysis Buy: Insufficient funds.")
 	}
-	b.Current -= purchaseValue
-	b.Holdings += int(quantity)
+	b.Current.Sub(b.Current, purchaseValue)
+	b.Holdings.Add(b.Holdings, quantity)
 	b.SourceOffset++
 	return nil
 }
@@ -54,9 +57,25 @@ func (b *analysisBroker) Sell(i interface{}) error {
 		return errors.New("Analysis Sell: Invalid purchase action.")
 	}
 	marketValue := b.Source[b.SourceOffset]
-	purchaseValue := marketValue.Price * float64(quantity)
-	b.Current += purchaseValue
-	b.Holdings -= int(quantity)
+	purchaseValue := big.NewFloat(0).Mul(
+		&marketValue.Price,
+		quantity)
+	b.Current.Add(b.Current, purchaseValue)
+	b.Holdings.Sub(b.Holdings, quantity)
 	b.SourceOffset++
 	return nil
+}
+
+func (b *analysisBroker) Trade(action *models.Action) {
+	if action == nil {
+		return
+	}
+	switch action.Type {
+	case models.ActionTypeBuy:
+		quantity := models.AnalysisBuy(&action.Quantity)
+		b.Buy(quantity)
+	case models.ActionTypeSell:
+		quantity := models.AnalysisSell(&action.Quantity)
+		b.Sell(quantity)
+	}
 }

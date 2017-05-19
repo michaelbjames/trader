@@ -1,9 +1,12 @@
 package models
 
+import "math/big"
+
 // Brokerage is how various trader executions should look.
 type Brokerage interface {
 	Buy(interface{}) error
 	Sell(interface{}) error
+	Trade(*Action)
 }
 
 // BrokerageName is the brokerage we'll execute a trade through.
@@ -18,9 +21,9 @@ const (
 
 type AnalysisInit struct {
 	Source    []Event
-	Principal float64
+	Principal *big.Float
 }
 
-type AnalysisBuy int
+type AnalysisBuy *big.Float
 
-type AnalysisSell int
+type AnalysisSell *big.Float

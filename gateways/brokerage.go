@@ -2,13 +2,6 @@ package gateways
 
 import "local/trader/models"
 
-func Trade(action *models.Action) {
-	if action == nil {
-		return
-	}
-	return
-}
-
 func New(gateway models.BrokerageName, conf interface{}) models.Brokerage {
 	switch gateway {
 	case models.BrokerAnalysis:

@@ -3,10 +3,12 @@ package main
 import (
 	"encoding/csv"
 	"fmt"
-	"local/trader/analysis"
+	"local/trader/gateways"
 	"local/trader/mappers"
 	"local/trader/models"
 	"local/trader/parsers"
+	"local/trader/updaters"
+	"math/big"
 	"os"
 	"strconv"
 
@@ -39,7 +41,7 @@ func historical(principalStr string, brokerageStr string, historyFileName string
 	if err != nil {
 		return errors.Wrap(err, "principal is not a number")
 	}
-	broker, err := mappers.ParseBroker(brokerageStr)
+	brokerName, err := mappers.ParseBroker(brokerageStr)
 	if err != nil {
 		return errors.Wrap(err, "could not parse broker")
 	}
@@ -49,25 +51,42 @@ func historical(principalStr string, brokerageStr string, historyFileName string
 		return errors.Wrap(err, "Unable to open file")
 	}
 	reader := csv.NewReader(csvFile)
-	closes, err := parsers.CoindeskMarketClose(reader)
+	events, err := parsers.CoindeskMarketClose(reader)
 	if err != nil {
 		fmt.Printf("%v", err)
 		os.Exit(1)
 	}
 
-	_ = newHistoricalHistory(principal, broker, closes)
+	analysisInit := models.AnalysisInit{
+		Source:    events,
+		Principal: big.NewFloat(principal),
+	}
+	broker := gateways.New(brokerName, analysisInit)
+	historyCore := newHistoricalHistory(big.NewFloat(principal), brokerName, events)
+	for _, day_close := range events {
+		historyCore, err := historyCore.SaveEvent(day_close)
+		if err != nil {
+			fmt.Printf("Save Event failed: %v", err)
+			panic("could not save event")
+		}
+		action, err := historyCore.TakeAction()
+		if err != nil {
+			fmt.Printf("Take Action failed: %v", err)
+			panic("could not take action")
+		}
+		broker.Trade(action)
+	}
 
-	analysis.TwoDayStreaks(closes)
+	// analysis.TwoDayStreaks(closes)
 	return nil
 }
 
-func newHistoricalHistory(principal float64, broker models.BrokerageName, events []models.Event) models.History {
+func newHistoricalHistory(principal *big.Float, broker models.BrokerageName, events []models.Event) models.History {
 	switch broker {
 	case models.BrokerAnalysis:
-		_ = models.AnalysisInit{
-			Source:    events,
-			Principal: principal,
-		}
+
+		engineState := updaters.NewManicMomentum(principal)
+		return engineState
 	}
 	return nil
 }

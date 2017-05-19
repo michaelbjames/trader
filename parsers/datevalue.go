@@ -3,15 +3,15 @@ package parsers
 import (
 	"encoding/csv"
 	"fmt"
-	"strconv"
+	"math/big"
 	"time"
 
 	"os"
 
+	"local/trader/models"
+
 	"github.com/pkg/errors"
 )
-
-import "local/trader/models"
 
 type options struct {
 	DateFmt  string
@@ -42,12 +42,12 @@ func parseLine(csvLine []string, dateFmt string) (models.Event, error) {
 	if err != nil {
 		return models.Event{}, errors.Wrap(err, "unable to parse time in line")
 	}
-	closePrice, err := strconv.ParseFloat(csvLine[1], 64)
+	closePrice, _, err := big.ParseFloat(csvLine[1], 10, 64, big.ToNearestEven)
 	if err != nil {
 		return models.Event{}, errors.Wrap(err, "unable to parse close price")
 	}
 	return models.Event{
 		Datetime: datetime,
-		Price:    closePrice,
+		Price:    *closePrice,
 	}, nil
 }
